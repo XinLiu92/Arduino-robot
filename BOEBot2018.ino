@@ -229,7 +229,7 @@ void loop()
 {
 	// poll encoders and perform odometry
 	poll_encoders();
-
+	//put method of detect target here
 	// Invoke GO TO Controller
 	go_to_goal_PID();
 	// If goal is reached advance to the next goal, if any left
