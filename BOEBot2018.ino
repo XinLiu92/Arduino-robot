@@ -240,11 +240,11 @@ void loop()
 {
 	// poll encoders and perform odometry
 	poll_encoders();
-<<<<<<< HEAD
-  //在setup里设置了第一个要去的目的地，然后在loop里的go_to_goal_PID方法里往那个点走，如果走到的话，把go_to_done设为1，执行完go_to_goal_PID 以后，再执行以后的几个点，在go_to_goal_idx
-=======
+
+  //在setup里设置了第一个要去的目的地，然后在loop里的go_to_goal_PID方法里往那个点走，如果走到的话，把go_to_done///设为1，执行完go_to_goal_PID 以后，再执行以后的几个点，在go_to_goal_idx
+
 	//put method of detect target here
->>>>>>> d8f53662b99da4c80519894be698a23117dfb3b3
+
 	// Invoke GO TO Controller
   detectTarget();
 
