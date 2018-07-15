@@ -162,17 +162,6 @@ unsigned char loop_counter_n;
 // every second
 long loop_counter_s;
 
-
-
-//===============================================
-
-int targetNum = 0;
-
-//work as boolean to show whether detection is done or not FOR CURRENT ROW!!!
-int detectDone = 0;
-
-//===============================================
-
 void setup()
 {
 	pinMode(ZERO_SERVOS, INPUT_PULLUP);
@@ -240,47 +229,13 @@ void loop()
 {
 	// poll encoders and perform odometry
 	poll_encoders();
-  //在setup里设置了第一个要去的目的地，然后在loop里的go_to_goal_PID方法里往那个点走，如果走到的话，把go_to_done设为1，执行完go_to_goal_PID 以后，再执行以后的几个点，在go_to_goal_idx
+
 	// Invoke GO TO Controller
-  detectTarget();
-
-  if(detectDone){
-    go_to_goal_PID();
-  }
-
-  detectTarget();
-  
+	go_to_goal_PID();
 	// If goal is reached advance to the next goal, if any left
-	if (go_to_done && detectDone) {
+	if (go_to_done) {
 		if (go_to_point.last == 0) {
 			go_to_state++;
-      if(go_to_state == 1){
-        //need fine the final location
-        double tmpX;
-        double tmpY;
-        switch (targetNum){
-          case 0:
-                tmpX = -16.0;
-                tmpY = -30.0;
-                  
-          case 1:
-                tmpX = -8.0;
-                tmpY = -30.0;
-              
-          case 2:
-                tmpX = 0.0;
-                tmpY = -30.0;
-          case 3:
-                tmpX = 8.0;
-                tmpY = -30.0;
-          case 4:
-                tmpX = 16.0;
-                tmpY = -30.0;
-        }
-        
-        
-        go_to_goal(tmpX, tmpY, 50, 3.0);
-      }
 			go_to_goal_idx(go_to_state);
 		}
 	}		
@@ -356,37 +311,6 @@ void loop()
 	us_start_marker = micros();
 }
 
-
-void detectTarget(){
-
-  //for now, just say 0 is the most left point and 180 is the most right point
-  detectDone = 0;
-  //detect left target
-  servoScanner.write(0);
-  
-  //need wait more
-  delay(100); 
-  double distance = sonar.ping_in();
-  if(distance > 12 && distance < 18 ){
-    
-    //find target
-    targetNum++;
-    distance = 0;
-  }
-  //detect right target
-  
-  servoScanner.write(180)
-  delay(15);
-  distance = sonar.ping_in();
-
-  if(distance > 12 && distance < 18 ){
-    //find target
-    targetNum++;
-    distance = 0;
-  }
-  detectDone = 1;
-  
-}
 void do_comm_tasks()
 {
 }
