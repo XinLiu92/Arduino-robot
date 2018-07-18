@@ -183,7 +183,7 @@ void setup()
 	servoRight.attach(P_Right_Servo);
 	servoScanner.attach(P_Scanner_Servo);
 	delay(100);
-	servoScanner.write(scanner_angle + scanner_offset);
+	//servoScanner.write(scanner_angle + scanner_offset);
 	delay(300);
 	//if (digitalRead(ZERO_SERVOS) == LOW) {
 	//	servoLeft.writeMicroseconds(L_SERVO_CENTER);
@@ -240,23 +240,19 @@ void loop()
 {
 	// poll encoders and perform odometry
 	poll_encoders();
-
-  //在setup里设置了第一个要去的目的地，然后在loop里的go_to_goal_PID方法里往那个点走，如果走到的话，把go_to_done///设为1，执行完go_to_goal_PID 以后，再执行以后的几个点，在go_to_goal_idx
-
-	//put method of detect target here
-
+ 
 	// Invoke GO TO Controller
-  detectTarget();
-
-  if(detectDone){
+  //detectTarget();
     go_to_goal_PID();
-  }
-
+//  if(detectDone){
+//    go_to_goal_PID();
+//  }
+/*
   detectTarget();
   
 	// If goal is reached advance to the next goal, if any left
 	if (go_to_done && detectDone) {
-		if (go_to_point.last == 0) {
+		
 			go_to_state++;
       if(go_to_state == 1){
         //need fine the final location
@@ -283,10 +279,12 @@ void loop()
         }
         
         
-        go_to_goal(tmpX, tmpY, 50, 3.0);
+        go_to_goal(tmpX, tmpY, -50, 3.0);
       }
-			go_to_goal_idx(go_to_state);
-		}
+			else{
+			  go_to_goal_idx(go_to_state);
+			}
+		
 	}		
 	
 	loop_counter_n++;
@@ -342,11 +340,11 @@ void loop()
 		}
 	}
 	// Move scanner servo at a time staggered 50 ms from ping
-	if (loop_counter_n == MIDDLE_LOOP) {
-		if (digitalRead(HALT_TURRET) != LOW) {
-			servoScanner.write(scanner_angle + scanner_offset);
-		}
-	}
+//	if (loop_counter_n == MIDDLE_LOOP) {
+//		if (digitalRead(HALT_TURRET) != LOW) {
+//			servoScanner.write(scanner_angle + scanner_offset);
+//		}
+//	}
 
 	// Whatever real time is left in loop() can be used for other tasks
 	// max_consumed_time is used to record maximum realtime used per loop
@@ -358,6 +356,7 @@ void loop()
 			do_comm_tasks();
 	}
 	us_start_marker = micros();
+ */
 }
 
 
@@ -369,18 +368,18 @@ void detectTarget(){
   servoScanner.write(0);
   
   //need wait more
-  delay(100); 
+  delay(1000); 
   double distance = sonar.ping_in();
   if(distance > 12 && distance < 18 ){
     
     //find target
     targetNum++;
-    distance = 0;
+    
   }
   //detect right target
   
-  servoScanner.write(180)
-  delay(15);
+  servoScanner.write(180);
+  delay(1000);
   distance = sonar.ping_in();
 
   if(distance > 12 && distance < 18 ){
@@ -629,6 +628,7 @@ void align_wheels()
 		if (VS < minv) break;
 	}
 	set_speeds_raw(0, 0);
+
 }
 
 void reset_odometry()
@@ -710,7 +710,13 @@ void go_to_goal_PID()
 	dx = go_to_x - bot_x;
 	dy = go_to_y - bot_y;
 	goal_heading = atan2(dy, dx);
-	bot_heading = atan2(bot_sin, bot_cos);
+  if (go_to_speed >= 0.0) {
+        bot_heading = atan2(bot_sin, bot_cos);      // driving forward: no change
+  } else {
+        bot_heading = atan2(-bot_sin, -bot_cos);    // driving backward: flip
+  }
+
+	
 	go_to_distance = hypot(dy, dx);
 	if (go_to_distance < go_to_tolerance) {
 		go_to_done = 1;
