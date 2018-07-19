@@ -171,6 +171,8 @@ int targetNum = 0;
 //work as boolean to show whether detection is done or not FOR CURRENT ROW!!!
 int detectDone = 0;
 int readyScan = 1;
+boolean runFirstRound = true;
+boolean runSecondRound = true;
 //===============================================
 
 void setup()
@@ -241,17 +243,19 @@ void loop()
 	// poll encoders and perform odometry
 	poll_encoders();
  
-	// Invoke GO TO Controller
-    if(readyScan){
+	// scan first row
+    if(runFirstRound){
+      runFirstRound = false;
+      runSecondRound = false;
       detectTarget();
+      go_to_goal(0, -15, -50, 3.0);
     }
-    
-    
-//  if(detectDone){
-//    go_to_goal_PID();
-//  }
 
-  //detectTarget();
+   if(runSecondRound){
+   		runSecondRound = false;
+   		detectTarget();
+   		go_to_final()
+   }
   
 	// If goal is reached advance to the next goal, if any left
 //	if (go_to_done && detectDone) {
@@ -259,30 +263,7 @@ void loop()
 //			go_to_state++;
 //      if(go_to_state == 1){
 //        //need fine the final location
-//        double tmpX;
-//        double tmpY;
-//        switch (targetNum){
-//          case 0:
-//                tmpX = -16.0;
-//                tmpY = -30.0;
-//                  
-//          case 1:
-//                tmpX = -8.0;
-//                tmpY = -30.0;
-//              
-//          case 2:
-//                tmpX = 0.0;
-//                tmpY = -30.0;
-//          case 3:
-//                tmpX = 8.0;
-//                tmpY = -30.0;
-//          case 4:
-//                tmpX = 16.0;
-//                tmpY = -30.0;
-//        }
 //        
-//        
-//        go_to_goal(tmpX, tmpY, -50, 3.0);
 //      }
 //			else{
 //			  go_to_goal_idx(go_to_state);
@@ -362,34 +343,65 @@ void loop()
  
 }
 
+unsigned int getDistance(){
+  sonar.ping();
+  unsigned int echoTime = sonar.ping();
+  delay(1);
+  return sonar.convert_in(echoTime)
+}
+
+void go_to_final(){
+	double tmpX;
+    double tmpY;
+    switch (targetNum){
+        case 0:
+             	tmpX = -16.0;
+                tmpY = -30.0;
+                  
+        case 1:
+                tmpX = -8.0;
+                tmpY = -30.0;
+              
+        case 2:
+                tmpX = 0.0;
+                tmpY = -30.0;
+        case 3:
+                tmpX = 8.0;
+                tmpY = -30.0;
+        case 4:
+                tmpX = 16.0;
+                tmpY = -30.0;
+        }
+        
+        
+        go_to_goal(tmpX, tmpY, -50, 3.0);
+}
 
 void detectTarget(){
-
-   // Serial.print("running");
+	//targetNum
+  detectDone = 0;
   readyScan = 0;
   //Serial.print(readyScan);
   servoScanner.write(0);
   //delay(100);
-  sonar.ping();
-  unsigned int echoTime = sonar.ping();
-  delay(1);
-  unsigned int distance = sonar.convert_in(echoTime);
+  unsigned int rightDistance = getDistance();
   //Serial.println("distance ");
-  Serial.println(distance);
-  if(distance < 20){
-    Serial.println("test");
-    delay(100);
-    servoScanner.write(180);
+  Serial.println(rightDistance);
+  if(rightDistance < 17 && rightDistance > 12){
+    //found target
+    targetNum++;
   }
-  delay(1000);
-    sonar.ping();
-    unsigned int echoTime2 = sonar.ping();
-    delay(1);
-   unsigned int distance2 = sonar.convert_in(echoTime2);
-  if(distance2 < 20){ 
-      Serial.println(distance2);
-      servoScanner.write(0);
+
+  delay(100);
+  servoScanner.write(180);
+  //delay(1000);
+  unsigned int leftDistance = getDistance();
+  if(leftDistance < 17 && leftDistance > 12){ 
+      //Serial.println(leftDistance);
+       targetNum++;
   }
+
+
   
 }
 void do_comm_tasks()
