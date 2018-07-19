@@ -306,7 +306,7 @@ void loop()
 			// Ping came back
 			// Latest echo delay is in variable: us_ping_result
 			Serial.print(us_ping_result/US_ROUNDTRIP_IN);
-			Serial.print(" ,");
+			Serial.print(" testing ,");
 		}
 		us_ping_result = 0;
 		// Send another ping 
@@ -379,7 +379,7 @@ void detectTarget(){
   }
   //detect right target
   
-  servoScanner.write(180)
+  servoScanner.write(180);
   delay(15);
   distance = sonar.ping_in();
 
