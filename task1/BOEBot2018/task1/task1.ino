@@ -186,7 +186,7 @@ void setup()
 	servoScanner.attach(P_Scanner_Servo);
 	delay(100);
 	servoScanner.write(0);
-	delay(300);
+	//delay(100);
 	//if (digitalRead(ZERO_SERVOS) == LOW) {
 	//	servoLeft.writeMicroseconds(L_SERVO_CENTER);
 	//	servoRight.writeMicroseconds(R_SERVO_CENTER);
@@ -195,7 +195,7 @@ void setup()
 	//}
 	// Serial.println("Align wheels");
 	align_wheels();
-	delay(1000);
+	//delay(100);
 	ENC_Right = 0;
 	ENC_Left = 0;
 	Old_ENC_Right = 0;
@@ -218,7 +218,13 @@ void setup()
 	go_to_state = 0;
 	// Serial.println("Init GOTO");
 	//delay(100);
-	//go_to_goal_idx(go_to_state);
+
+ 
+ 
+  if(runFirstRound){
+   // go_to_goal_idx(go_to_state);
+  }
+	
 	// Serial.println("GOTO Done");
 
 	// Initial time
@@ -236,26 +242,46 @@ void setup()
 	sonar.ping_timer(periodicInterrupt);	// 
 	ping_in_progress = 1;
 	sonar.timer_us(ECHO_TIMER_FREQ, periodicInterrupt);
+
+
+
+
+
 }  
  
 void loop()
 {
 	// poll encoders and perform odometry
 	poll_encoders();
- 
-	// scan first row
+  
+     //go_to_goal_PID();
     if(runFirstRound){
-      runFirstRound = false;
+        runFirstRound = false;
       runSecondRound = false;
-      detectTarget();
-      go_to_goal(0, -15, -50, 3.0);
-    }
+  detectTarget();
+//  runFirstRound = true;
+ }
+     
+  
+//  if(readyScan){
+//    readyScan = 0;
+//    go_to_goal(0,-15, -50, 3.0);
+//  }
+//  Serial.println(getDistance());
+	// scan first row
+//    if(runFirstRound){
+//      runFirstRound = false;
+//      runSecondRound = false;
+//      detectTarget();
+//      go_to_goal_PID();
+//      go_to_goal(0, -15, -50, 3.0);
+//    }
 
-   if(runSecondRound){
-   		runSecondRound = false;
-   		detectTarget();
-   		go_to_final()
-   }
+//   if(runSecondRound){
+//   		runSecondRound = false;
+//   		detectTarget();
+//   		go_to_final()
+//   }
   
 	// If goal is reached advance to the next goal, if any left
 //	if (go_to_done && detectDone) {
@@ -346,8 +372,8 @@ void loop()
 unsigned int getDistance(){
   sonar.ping();
   unsigned int echoTime = sonar.ping();
-  delay(1);
-  return sonar.convert_in(echoTime)
+  //delay(1);
+  return sonar.convert_in(echoTime);
 }
 
 void go_to_final(){
@@ -379,29 +405,33 @@ void go_to_final(){
 
 void detectTarget(){
 	//targetNum
+ 
   detectDone = 0;
-  readyScan = 0;
+  
   //Serial.print(readyScan);
   servoScanner.write(0);
-  //delay(100);
-  unsigned int rightDistance = getDistance();
+  delay(100);
+//  unsigned int rightDistance = getDistance();
   //Serial.println("distance ");
-  Serial.println(rightDistance);
-  if(rightDistance < 17 && rightDistance > 12){
+//  Serial.println(rightDistance);
+//  if(rightDistance < 20 && rightDistance > 10){
     //found target
-    targetNum++;
-  }
+//    targetNum++;
+//  }
 
   delay(100);
   servoScanner.write(180);
-  //delay(1000);
+  delay(2000);
   unsigned int leftDistance = getDistance();
-  if(leftDistance < 17 && leftDistance > 12){ 
-      //Serial.println(leftDistance);
+  Serial.println(leftDistance);
+  if(leftDistance < 20 && leftDistance > 10){ 
+//      Serial.println(leftDistance);
        targetNum++;
   }
 
+   Serial.println(targetNum);
 
+ 
   
 }
 void do_comm_tasks()
@@ -618,7 +648,7 @@ void align_wheels()
 {
 	int i, VS, minv;
 	
-	set_speeds_raw(0, 30);
+	set_speeds_raw(0, 1);
 	minv = 2000;
 	for (i=0; i<500; i++) {
 		delay(1);
@@ -632,7 +662,7 @@ void align_wheels()
 		if (VS < minv) break;
 	}
 	set_speeds_raw(0, 0);
-	set_speeds_raw(30, 0);
+	set_speeds_raw(1, 0);
 	minv = 2000;
 	for (i=0; i<500; i++) {
 		delay(1);
