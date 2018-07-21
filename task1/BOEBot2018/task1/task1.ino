@@ -224,7 +224,7 @@ void setup()
  
  
     
-       go_to_goal_idx(0);
+       //go_to_goal_idx(0);
     
    
   
@@ -252,36 +252,41 @@ void setup()
 void loop()
 {
 	// poll encoders and perform odometry
+ Serial.println("============================");
 	poll_encoders();
   
     
     if(runFirstRound){
+
+      Serial.println("scan begin");
       runFirstRound = false;
       runSecondRound = false;
       runThirdRound = false;
       detectTarget();
       runSecondRound = true;
+      Serial.println("scan finished");
  }  
-      if(letGo){
-        go_to_goal_PID();
-      }
+     
+     go_to_goal_PID();
+        
       
-      
-      if(runSecondRound){
+    
+    if(runSecondRound){
         runSecondRound = false;
-        //if(go_to_done){
-          // if (go_to_point.last == 0){
-            go_to_goal_idx(1);
-          //}
-           
-          //}
-       
-        delay(2500);
-        
-        runThirdRound = true;
-        
+//        //if(go_to_done){
+//          // if (go_to_point.last == 0){
+            go_to_goal_idx(0);
+            
+//          //}
+//           
+//          //}
+//       
+//        delay(2500);
 //        
-      }
+//        runThirdRound = true;
+//        
+////        
+     }
 
       
 //      if(runSecondRound){
@@ -410,7 +415,7 @@ void loop()
 			do_comm_tasks();
 	}
 	us_start_marker = micros();
- 
+  delay(5000);
 }
 
 unsigned int getDistance(){
@@ -458,10 +463,10 @@ void detectTarget(){
   unsigned int rightDistance = getDistance();
 
   
-  Serial.println("distance ");
+  //Serial.println("distance ");
   
   // unsigned int rightDistance = us_ping_result/US_ROUNDTRIP_IN;
-  Serial.println(rightDistance);
+  //Serial.println(rightDistance);
   
   if(rightDistance < 20 && rightDistance > 10){
     //found target
@@ -473,14 +478,14 @@ void detectTarget(){
   delay(500);
   unsigned int leftDistance = getDistance();
  // unsigned int leftDistance = us_ping_result/US_ROUNDTRIP_IN;
-  Serial.println(leftDistance);
+  //Serial.println(leftDistance);
    
   if(leftDistance < 20 && leftDistance > 10){ 
 //      Serial.println(leftDistance);
        targetNum++;
   }
 
-   Serial.println(targetNum);
+   //Serial.println(targetNum);
 
  
   
@@ -761,6 +766,10 @@ void reset_encoder_counts()
 //   
 void go_to_goal(double gx, double gy, int speed, double tolerance)
 {
+	Serial.println("go_to_goal ");
+  Serial.print(gx);
+  Serial.print(" ");
+  Serial.print(gy);
 	go_to_done = 0;
 	go_to_x = gx;
 	go_to_y = gy;
@@ -782,6 +791,8 @@ void go_to_goal(double gx, double gy, int speed, double tolerance)
 //
 void go_to_goal_idx(int idx)
 {
+	
+	Serial.println("go_to_goal index");
 	int i;
 	char *ramp;
 	char *flashp;
@@ -802,11 +813,16 @@ void go_to_goal_idx(int idx)
 //
 void go_to_goal_PID()
 {
+	Serial.println("go_to_goal_PID");
+	
 	double dx, dy;
 	int speed;
-  readyScan = 0;
+  
 	
-	if (go_to_done) return;
+	if (go_to_done) {
+	  Serial.println("checked arrived");
+	  return;
+	}
 	dx = go_to_x - bot_x;
 	dy = go_to_y - bot_y;
 	goal_heading = atan2(dy, dx);
@@ -820,7 +836,7 @@ void go_to_goal_PID()
 	go_to_distance = hypot(dy, dx);
 	if (go_to_distance < go_to_tolerance) {
 		go_to_done = 1;
-    readyScan = 1;
+   Serial.println("just arrive");
 		set_speeds_calibrated(0, 0);
 		return;
 	}
@@ -858,6 +874,8 @@ void go_to_goal_PID()
 	} else {
 		set_speeds_calibrated(left_speed, right_speed);
 	}
+
+  
 }
 
 void periodicInterrupt() { // Timer2 interrupt calls this function every 50us for 0.83 cm accuracy

@@ -216,8 +216,11 @@ void setup()
 	go_to_state = 0;
 	// Serial.println("Init GOTO");
 	delay(100);
+
+ Serial.println("setup go");
 	go_to_goal_idx(go_to_state);
 	// Serial.println("GOTO Done");
+ Serial.println("after setup go");
 
 	// Initial time
 	us_ticks = micros();
@@ -238,6 +241,8 @@ void setup()
  
 void loop()
 {
+
+  Serial.println("======================================================");
 	// poll encoders and perform odometry
 	poll_encoders();
 
@@ -246,45 +251,12 @@ void loop()
 	//put method of detect target here
 
 	// Invoke GO TO Controller
-  detectTarget();
-
-  if(detectDone){
     go_to_goal_PID();
-  }
-
-  detectTarget();
-  
+    
 	// If goal is reached advance to the next goal, if any left
-	if (go_to_done && detectDone) {
+	if (go_to_done) {
 		if (go_to_point.last == 0) {
 			go_to_state++;
-      if(go_to_state == 1){
-        //need fine the final location
-        double tmpX;
-        double tmpY;
-        switch (targetNum){
-          case 0:
-                tmpX = -16.0;
-                tmpY = -30.0;
-                  
-          case 1:
-                tmpX = -8.0;
-                tmpY = -30.0;
-              
-          case 2:
-                tmpX = 0.0;
-                tmpY = -30.0;
-          case 3:
-                tmpX = 8.0;
-                tmpY = -30.0;
-          case 4:
-                tmpX = 16.0;
-                tmpY = -30.0;
-        }
-        
-        
-        go_to_goal(tmpX, tmpY, 50, 3.0);
-      }
 			go_to_goal_idx(go_to_state);
 		}
 	}		
@@ -358,6 +330,8 @@ void loop()
 			do_comm_tasks();
 	}
 	us_start_marker = micros();
+
+ delay(5000);
 }
 
 
@@ -662,6 +636,11 @@ void reset_encoder_counts()
 //   
 void go_to_goal(double gx, double gy, int speed, double tolerance)
 {
+	
+	Serial.println("go to goal ");
+ Serial.print(gx);
+ Serial.print(" ");
+ Serial.println(gy);
 	go_to_done = 0;
 	go_to_x = gx;
 	go_to_y = gy;
@@ -683,6 +662,7 @@ void go_to_goal(double gx, double gy, int speed, double tolerance)
 //
 void go_to_goal_idx(int idx)
 {
+	Serial.println("go to goal indx");
 	int i;
 	char *ramp;
 	char *flashp;
@@ -703,6 +683,8 @@ void go_to_goal_idx(int idx)
 //
 void go_to_goal_PID()
 {
+	
+	Serial.println("go_to_goal_PID");
 	double dx, dy;
 	int speed;
 	
