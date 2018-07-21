@@ -175,6 +175,8 @@ boolean runFirstRound = true;
 boolean runSecondRound = true;
 boolean runThirdRound = true;
 boolean letGo = true;
+double targetX = 0.0;
+double targetY = 0.0;
 //===============================================
 
 void setup()
@@ -255,38 +257,40 @@ void loop()
  Serial.println("============================");
 	poll_encoders();
   
-    
-    if(runFirstRound){
-
-      Serial.println("scan begin");
-      runFirstRound = false;
-      runSecondRound = false;
-      runThirdRound = false;
-      detectTarget();
-      runSecondRound = true;
-      Serial.println("scan finished");
- }  
+//    if(runFirstRound){
+//      Serial.println("scan begin");
+//      runFirstRound = false;
+//      runSecondRound = false;
+//      runThirdRound = false;
+//      detectTarget();
+//      runSecondRound = true;
+//      Serial.println("scan finished");
+// }  
      
      go_to_goal_PID();
-        
-      
-    
-    if(runSecondRound){
-        runSecondRound = false;
-//        //if(go_to_done){
-//          // if (go_to_point.last == 0){
-            go_to_goal_idx(0);
-            
-//          //}
-//           
-//          //}
-//       
-//        delay(2500);
-//        
-//        runThirdRound = true;
-//        
-////        
+
+     if(go_to_done){
+        if(go_to_point.last == 0)
+          {
+            go_to_goal_idx(go_to_state++);
+          }
      }
+     
+    
+    
+//    if(runSecondRound){
+//        runSecondRound = false;
+//            go_to_goal_idx(0);
+//        runThirdRound = true;
+//      
+//     }
+
+//           if(runThirdRound){
+////          runThirdRound = false;
+//            go_to_goal_idx(1);
+//          //servoScanner.write(0);
+////          delay(100);
+//      }
 
       
 //      if(runSecondRound){
@@ -385,7 +389,8 @@ void loop()
 			loop_counter_s = 0;
 		}
 		if ((loop_counter_s % 5) == 2) {
-			// if (bot_plot) print_debug2a(); else print_debug2();
+			// if (bot_plot
+			) print_debug2a(); else print_debug2();
 		}
 		// Update the scanner angle but don't move the servo yet
 		old_angle = scanner_angle;
@@ -415,7 +420,7 @@ void loop()
 			do_comm_tasks();
 	}
 	us_start_marker = micros();
-  delay(5000);
+
 }
 
 unsigned int getDistance(){

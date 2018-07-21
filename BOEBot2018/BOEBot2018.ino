@@ -162,17 +162,6 @@ unsigned char loop_counter_n;
 // every second
 long loop_counter_s;
 
-
-
-//===============================================
-
-int targetNum = 0;
-
-//work as boolean to show whether detection is done or not FOR CURRENT ROW!!!
-int detectDone = 0;
-
-//===============================================
-
 void setup()
 {
 	pinMode(ZERO_SERVOS, INPUT_PULLUP);
@@ -216,11 +205,8 @@ void setup()
 	go_to_state = 0;
 	// Serial.println("Init GOTO");
 	delay(100);
-
- Serial.println("setup go");
 	go_to_goal_idx(go_to_state);
 	// Serial.println("GOTO Done");
- Serial.println("after setup go");
 
 	// Initial time
 	us_ticks = micros();
@@ -241,23 +227,18 @@ void setup()
  
 void loop()
 {
-
-  Serial.println("======================================================");
 	// poll encoders and perform odometry
+
+ Serial.println("=====================================================");
 	poll_encoders();
 
-  //在setup里设置了第一个要去的目的地，然后在loop里的go_to_goal_PID方法里往那个点走，如果走到的话，把go_to_done///设为1，执行完go_to_goal_PID 以后，再执行以后的几个点，在go_to_goal_idx
-
-	//put method of detect target here
-
 	// Invoke GO TO Controller
-    go_to_goal_PID();
-    
+	go_to_goal_PID();
 	// If goal is reached advance to the next goal, if any left
 	if (go_to_done) {
 		if (go_to_point.last == 0) {
-			go_to_state++;
-			go_to_goal_idx(go_to_state);
+			  go_to_state++;
+			  go_to_goal_idx(go_to_state);
 		}
 	}		
 	
@@ -278,7 +259,7 @@ void loop()
 			// Ping came back
 			// Latest echo delay is in variable: us_ping_result
 			Serial.print(us_ping_result/US_ROUNDTRIP_IN);
-			Serial.print(" testing ,");
+			Serial.print(",");
 		}
 		us_ping_result = 0;
 		// Send another ping 
@@ -330,41 +311,8 @@ void loop()
 			do_comm_tasks();
 	}
 	us_start_marker = micros();
-
- delay(5000);
 }
 
-
-void detectTarget(){
-
-  //for now, just say 0 is the most left point and 180 is the most right point
-  detectDone = 0;
-  //detect left target
-  servoScanner.write(0);
-  
-  //need wait more
-  delay(100); 
-  double distance = sonar.ping_in();
-  if(distance > 12 && distance < 18 ){
-    
-    //find target
-    targetNum++;
-    distance = 0;
-  }
-  //detect right target
-  
-  servoScanner.write(180);
-  delay(15);
-  distance = sonar.ping_in();
-
-  if(distance > 12 && distance < 18 ){
-    //find target
-    targetNum++;
-    distance = 0;
-  }
-  detectDone = 1;
-  
-}
 void do_comm_tasks()
 {
 }
@@ -636,11 +584,10 @@ void reset_encoder_counts()
 //   
 void go_to_goal(double gx, double gy, int speed, double tolerance)
 {
-	
-	Serial.println("go to goal ");
- Serial.print(gx);
- Serial.print(" ");
- Serial.println(gy);
+	Serial.print("go to gaol ");
+  Serial.print(gx);
+  Serial.print(" ");
+  Serial.println(gy);
 	go_to_done = 0;
 	go_to_x = gx;
 	go_to_y = gy;
@@ -662,7 +609,7 @@ void go_to_goal(double gx, double gy, int speed, double tolerance)
 //
 void go_to_goal_idx(int idx)
 {
-	Serial.println("go to goal indx");
+	Serial.println("go to goal index");
 	int i;
 	char *ramp;
 	char *flashp;
@@ -683,8 +630,8 @@ void go_to_goal_idx(int idx)
 //
 void go_to_goal_PID()
 {
-	
-	Serial.println("go_to_goal_PID");
+	Serial.print("go_to_goal_PID: go to done: ");
+  Serial.println(go_to_done);
 	double dx, dy;
 	int speed;
 	
