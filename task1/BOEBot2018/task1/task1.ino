@@ -173,6 +173,8 @@ int detectDone = 0;
 int readyScan = 1;
 boolean runFirstRound = true;
 boolean runSecondRound = true;
+boolean runThirdRound = true;
+boolean letGo = true;
 //===============================================
 
 void setup()
@@ -186,7 +188,7 @@ void setup()
 	servoScanner.attach(P_Scanner_Servo);
 	delay(100);
 	servoScanner.write(0);
-	//delay(100);
+	
 	//if (digitalRead(ZERO_SERVOS) == LOW) {
 	//	servoLeft.writeMicroseconds(L_SERVO_CENTER);
 	//	servoRight.writeMicroseconds(R_SERVO_CENTER);
@@ -218,12 +220,14 @@ void setup()
 	go_to_state = 0;
 	// Serial.println("Init GOTO");
 	//delay(100);
-
+     
  
  
-  if(runFirstRound){
-   // go_to_goal_idx(go_to_state);
-  }
+    
+       go_to_goal_idx(0);
+    
+   
+  
 	
 	// Serial.println("GOTO Done");
 
@@ -243,10 +247,6 @@ void setup()
 	ping_in_progress = 1;
 	sonar.timer_us(ECHO_TIMER_FREQ, periodicInterrupt);
 
-
-
-
-
 }  
  
 void loop()
@@ -254,14 +254,58 @@ void loop()
 	// poll encoders and perform odometry
 	poll_encoders();
   
-     //go_to_goal_PID();
+    
     if(runFirstRound){
-        runFirstRound = false;
+      runFirstRound = false;
       runSecondRound = false;
-  detectTarget();
-//  runFirstRound = true;
- }
-     
+      runThirdRound = false;
+      detectTarget();
+      runSecondRound = true;
+ }  
+      if(letGo){
+        go_to_goal_PID();
+      }
+      
+      
+      if(runSecondRound){
+        runSecondRound = false;
+        //if(go_to_done){
+          // if (go_to_point.last == 0){
+            go_to_goal_idx(1);
+          //}
+           
+          //}
+       
+        delay(2500);
+        
+        runThirdRound = true;
+        
+//        
+      }
+
+      
+//      if(runSecondRound){
+//         if (go_to_done) {
+//            if (go_to_point.last == 0) {
+//                go_to_state++;
+//                go_to_goal_idx(0);
+//                delay(3000);
+//           }
+//          }
+//
+//           runSecondRound = false;
+//           runThirdRound = true;
+//      }
+//      
+//      if(runThirdRound){
+//          runThirdRound = false;
+//          servoScanner.write(0);
+//          delay(100);
+//      }
+
+
+
+      
   
 //  if(readyScan){
 //    readyScan = 0;
@@ -407,23 +451,30 @@ void detectTarget(){
 	//targetNum
  
   detectDone = 0;
-  
+ 
   //Serial.print(readyScan);
   servoScanner.write(0);
   delay(100);
-//  unsigned int rightDistance = getDistance();
-  //Serial.println("distance ");
-//  Serial.println(rightDistance);
-//  if(rightDistance < 20 && rightDistance > 10){
-    //found target
-//    targetNum++;
-//  }
+  unsigned int rightDistance = getDistance();
 
-  delay(100);
+  
+  Serial.println("distance ");
+  
+  // unsigned int rightDistance = us_ping_result/US_ROUNDTRIP_IN;
+  Serial.println(rightDistance);
+  
+  if(rightDistance < 20 && rightDistance > 10){
+    //found target
+    targetNum++;
+  }
+
+//  delay(100);
   servoScanner.write(180);
-  delay(2000);
+  delay(500);
   unsigned int leftDistance = getDistance();
+ // unsigned int leftDistance = us_ping_result/US_ROUNDTRIP_IN;
   Serial.println(leftDistance);
+   
   if(leftDistance < 20 && leftDistance > 10){ 
 //      Serial.println(leftDistance);
        targetNum++;
